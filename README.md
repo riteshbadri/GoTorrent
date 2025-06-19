@@ -1,0 +1,1 @@
+GoTorrent is a concurrent BitTorrent client built in Go. It supports .torrent parsing, peer discovery, TCP-based peer communication, and parallel piece downloading using goroutines. It verifies pieces with SHA-1 and reassembles files with precision. 

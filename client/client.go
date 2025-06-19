@@ -11,29 +11,22 @@ import (
 	"time"
 )
 
+// A Client is a TCP connection with a peer
 type Client struct {
 	Conn     net.Conn
 	Choked   bool
 	Bitfield bitfield.Bitfield
-	Peer     peers.Peer
+	peer     peers.Peer
 	infoHash [20]byte
 	peerID   [20]byte
 }
 
 func completeHandshake(conn net.Conn, infohash, peerID [20]byte) (*handshake.Handshake, error) {
-	err := conn.SetDeadline(time.Now().Add(3 * time.Second))
-	if err != nil {
-		return nil, err
-	}
-	defer func(conn net.Conn, t time.Time) {
-		err := conn.SetDeadline(t)
-		if err != nil {
-
-		}
-	}(conn, time.Time{}) // Disable the deadline
+	conn.SetDeadline(time.Now().Add(3 * time.Second))
+	defer conn.SetDeadline(time.Time{}) // Disable the deadline
 
 	req := handshake.New(infohash, peerID)
-	_, err = conn.Write(req.Serialize())
+	_, err := conn.Write(req.Serialize())
 	if err != nil {
 		return nil, err
 	}
@@ -49,16 +42,8 @@ func completeHandshake(conn net.Conn, infohash, peerID [20]byte) (*handshake.Han
 }
 
 func recvBitfield(conn net.Conn) (bitfield.Bitfield, error) {
-	err := conn.SetDeadline(time.Now().Add(5 * time.Second))
-	if err != nil {
-		return nil, err
-	}
-	defer func(conn net.Conn, t time.Time) {
-		err := conn.SetDeadline(t)
-		if err != nil {
-
-		}
-	}(conn, time.Time{}) // Disable the deadline
+	conn.SetDeadline(time.Now().Add(5 * time.Second))
+	defer conn.SetDeadline(time.Time{}) // Disable the deadline
 
 	msg, err := message.Read(conn)
 	if err != nil {
@@ -86,19 +71,13 @@ func New(peer peers.Peer, peerID, infoHash [20]byte) (*Client, error) {
 
 	_, err = completeHandshake(conn, infoHash, peerID)
 	if err != nil {
-		err := conn.Close()
-		if err != nil {
-			return nil, err
-		}
+		conn.Close()
 		return nil, err
 	}
 
 	bf, err := recvBitfield(conn)
 	if err != nil {
-		err := conn.Close()
-		if err != nil {
-			return nil, err
-		}
+		conn.Close()
 		return nil, err
 	}
 
@@ -106,7 +85,7 @@ func New(peer peers.Peer, peerID, infoHash [20]byte) (*Client, error) {
 		Conn:     conn,
 		Choked:   true,
 		Bitfield: bf,
-		Peer:     peer,
+		peer:     peer,
 		infoHash: infoHash,
 		peerID:   peerID,
 	}, nil

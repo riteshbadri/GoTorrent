@@ -8,7 +8,7 @@ import (
 //var wg sync.WaitGroup
 
 func main() {
-	inPath := "C://Users//Ritesh//OneDrive//Desktop//Golang//GoTorrent//debian-12.11.0-amd64-netinst.iso.torrent"
+	inPath := "debian-12.11.0-amd64-netinst.iso.torrent"
 	//inPath := os.Args[1]
 	outPath := "debian.iso"
 	//outPath := os.Args[2]
